@@ -1,0 +1,29 @@
+name: get Artifactory secrets
+description: Get Artifactory secrets from GSM and creates Github env variables
+inputs:
+  GOOGLE_PROJECT
+    description: "GSM project"
+    required: true
+  ARTIFACTORY_NAMESPACE:
+    description: "Artifactory namespace"
+    required: true
+
+runs: |
+  using: "composite"
+  steps:
+    - name: Load GSM secrets
+      id: secrets
+      uses: google-github-actions/get-secretmanager-secrets@v1
+      with:
+        
+        secrets:
+          artifactory_username:${{ inputs.GOOGLE_PROJECT }}/ARTIFACTORY_USERNAME
+          artifactory_password:${{ inputs.GOOGLE_PROJECT }}/ARTIFACTORY_PASSWORD
+
+    - name: Hydrate environment
+      id: enviroment
+      shell: bash
+      run |
+          echo "ARTIFACTORY_USERNAME=${{ steps.secrets.output.artifactory_username }}" >> $GITHUB_ENV
+          echo "ARTIFACTORY_PASSWORD=${{ steps.secrets.output.artifactory_password }}" >> $GITHUB_ENV
+          echo "ARTIFACTORY_NAMESPACE=${{ inputs.ARTIFACTORY_NAMESPACE }}" >> $GITHUB_ENV
